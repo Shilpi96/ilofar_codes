@@ -1,3 +1,4 @@
+##### the data is at https://data.lofar.ie
 ##### this code will plot bst spectra 
 import datetime as datetime
 import numpy as np
