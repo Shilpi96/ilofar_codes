@@ -1,5 +1,3 @@
-##### first run read_bst.py to save the bst npy files and then use this code to plot the spectra.
-
 import numpy as np
 from datetime import datetime
 import matplotlib.pyplot as plt
@@ -7,6 +5,7 @@ import pdb
 from matplotlib.colors import LogNorm
 from matplotlib import dates
 def freq_axis(freqs):
+	freqs = freqs[::-1]
 	gap1 = np.flipud(freqs[288]+(np.arange(59)*0.390625)) 
 	gap2 = np.flipud(freqs[88]+(np.arange(57)*0.390625))
 	ax_shape = 59+57-1
@@ -18,6 +17,17 @@ def freq_axis(freqs):
 	new_freq[345:404] = gap1[:59]
 	new_freq[404:] = freqs[289:]
 	return new_freq
+
+def data_expand(data):
+	data = np.flipud(data)
+	data[np.where(np.isinf(data)==True)] = 0.0
+	data2 = np.empty((freq.shape[0], data.shape[1]))    
+   
+	data2[:] = np.nan
+	data2[0:88] = data[0:88]
+	data2[145:345] = data[88:288]
+	data2[404:] = data[289:]
+	return data2
 
 def backsub(data, percentile=5.0):
 
@@ -40,29 +50,20 @@ def backsub(data, percentile=5.0):
 path = '/Users/shilpibhunia/Documents/projects/March_2025_campaign/event_2025_03_26/ilofar_data/'
 npy_data = np.load(path+'20250326_083037_bst_00X.npy',allow_pickle=True)
 freqs = npy_data[0]['freq']
-freqs = freqs[::-1]
-
 freq = freq_axis(freqs)
 
 data = npy_data[0]['data']
-data = np.flipud(data)
-data[np.where(np.isinf(data)==True)] = 0.0
-data2 = np.empty((freq.shape[0], data.shape[1]))    
-   
-data2[:] = np.nan
-data2[0:88] = data[0:88]
-data2[145:345] = data[88:288]
-data2[404:] = data[289:]
-	
+data = data_expand(data)
+data = backsub(data, percentile=5.0)
+
 time = npy_data[0]['time']
 times = np.array([datetime.fromtimestamp(t) for t in time])
 
-data = backsub(data2, percentile=5.0)
 
-fig = plt.figure(figsize=(12, 3))
+fig = plt.figure(figsize=(12, 7))
 ax1 = fig.add_subplot(111)
 #vmm = np.percentile(data, [1,96])
-peak1 = ax1.imshow(np.log10(data),cmap=plt.get_cmap('Spectral_r'), aspect = 'auto', origin = 'lower',
+peak1 = ax1.imshow(np.log10(data),cmap=plt.get_cmap('viridis'), aspect = 'auto', origin = 'lower',
        extent=(times[0], times[-1], freq[-1], freq[0]))
 #cbar_ax = fig.add_axes([0.91, 0.1, 0.02, 0.4])
 #cbar = fig.colorbar(peak1, cax=cbar_ax)
