@@ -1,3 +1,4 @@
+### First run read_bst_data.py and get .npy files
 import numpy as np
 from datetime import datetime
 import matplotlib.pyplot as plt
